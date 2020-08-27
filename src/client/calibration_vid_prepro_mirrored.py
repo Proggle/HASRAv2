@@ -241,12 +241,12 @@ class split_vids_in_thirds:
 
             left_fn = output_dir + os.sep + 'camera-1-' + curr[:-4] + '.avi'
             mid_fn = output_dir + os.sep + 'camera-2-' + curr[:-4] + '.avi'
-            right_fn = = output_dir + os.sep + 'camera-3-' + curr[:-4] + '.avi'
+            right_fn = output_dir + os.sep + 'camera-3-' + curr[:-4] + '.avi'
 
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-            out1 = cv2.VideoWriter(left_fn, fourcc, fps, (int(w//3),int(h)), False)
-            out2 = cv2.VideoWriter(mid_fn, fourcc, fps, (int(w//3),int(h)), False)
-            out3 = cv2.VideoWriter(right_fn, fourcc, fps, (int(w//3),int(h)), False)
+            out1 = cv2.VideoWriter(left_fn, fourcc, fps, (int(w//3 + 10),int(h)), False)
+            out2 = cv2.VideoWriter(mid_fn, fourcc, fps, (int(w//3 + 10),int(h)), False)
+            out3 = cv2.VideoWriter(right_fn, fourcc, fps, (int(w//3 + 10),int(h)), False)
 
 
             while(True):
@@ -256,22 +256,22 @@ class split_vids_in_thirds:
                     
                     # pixel coords of left cam
                     start_row, start_col = int(0), int(0)
-                    end_row, end_col = int(h), int(w//3)
+                    end_row, end_col = int(h), int(w//3 + 10)
                     cropped_left = gray[start_row:end_row , start_col:end_col]
 
                     # pixel coords of mid cam
-                    start_row, start_col = int(0), int(w//3)
-                    end_row, end_col = int(h), int((w//3)*2)
+                    start_row, start_col = int(0), int(w//3 - 5)
+                    end_row, end_col = int(h), int((w//3)*2 + 5)
                     cropped_mid = gray[start_row:end_row , start_col:end_col]
 
                     # pixel coords of right cam
-                    start_row, start_col = int(0), int((w//3)*2)
+                    start_row, start_col = int(0), int((w//3)*2 - 10)
                     end_row, end_col = int(h), int(w)
                     cropped_right = gray[start_row:end_row , start_col:end_col]
 
-                    cropped_left = cv2.resize(cropped_left, (int(w//3),int(h)))
-                    cropped_mid = cv2.resize(cropped_mid, (int(w//3),int(h)))
-                    cropped_right = cv2.resize(cropped_right, (int(w//3),int(h)))
+                    cropped_left = cv2.resize(cropped_left, (int(w//3 + 10),int(h)))
+                    cropped_mid = cv2.resize(cropped_mid, (int(w//3 + 10),int(h)))
+                    cropped_right = cv2.resize(cropped_right, (int(w//3 + 10),int(h)))
 
                     out1.write(cropped_left)
                     out2.write(cropped_mid)
@@ -288,7 +288,9 @@ class split_vids_in_thirds:
             out3.release()
             cv2.destroyAllWindows()
 
-sv = split_vids(videos_dir_path, project_name)
+
+
+sv = split_vids_in_thirds(videos_dir_path, project_name)
 sv.video_file_splitter()
 
 # dsf = del_single_frames(project_name)
