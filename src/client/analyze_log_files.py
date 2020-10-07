@@ -92,7 +92,6 @@ class mod_df:
 
         saved_val = saved_val.iloc[0]
 
-        # print(saved_val)
 
         start_day = df[7][0]
         start_day = datetime.datetime.strptime(start_day, '%d-%b-%y')
@@ -105,7 +104,6 @@ class mod_df:
 
         # df2['1_num_entries'][0] = saved_val
         df2.loc[:, ('1_num_entries', 0)] = saved_val
-
 
         for i in range(9):
             del df2[i]
@@ -152,6 +150,7 @@ def main(root_dir_path):
         main_df = main_df.sort_values(by='animal_id')
         main_df.to_csv('transposed_log_file.csv')
         print('done!')
+        
 parser = argparse.ArgumentParser()
 parser.add_argument('path', help='enter the path to the root directory containing all the wave folders',
                     type=str)
