@@ -102,12 +102,12 @@ class mod_df:
         constant_data = {'animal_id': [self.animal_id], 'wave': [self.wave], 'cage_num': [df[1][0]], 'rfid': [df[3][0]], 'mouse_num': [df[2][0]], 'surgery_status': [self.surgery_status], 'surgery_day': [self.day_of_surgery]}
         for x, y in df2.iterrows():
             day_delta = (datetime.datetime.strptime(y[7], '%d-%b-%y') - start_day).days + 1# //10**9
-            rowwise_data = {str(day_delta) + '_daily_time_in_tunnel': [y['daily_time_in_tunnel']], str(day_delta) + '_num_entries': [y['num_entries']], str(day_delta) + '_daily_time_in_tunnel_with_presentations': [y['daily_time_in_tunnel_with_presentations']], str(day_delta) + '_daily_presentations': [y['daily_presentations']]}
+            rowwise_data = {str(day_delta) + '_daily_time_in_tunnel_2': [y['daily_time_in_tunnel']], str(day_delta) + '_num_entries_0': [y['num_entries']], str(day_delta) + '_daily_time_in_tunnel_with_presentations_3': [y['daily_time_in_tunnel_with_presentations']], str(day_delta) + '_daily_presentations_1': [y['daily_presentations']]}
             tmp_df = pd.DataFrame(rowwise_data)
             df2 = pd.concat([df2, tmp_df], axis=1)
 
         # df2['1_num_entries'][0] = saved_val
-        df2.loc[:, ('1_num_entries', 0)] = saved_val
+        df2.loc[:, ('1_num_entries_0', 0)] = saved_val
 
         for i in range(9):
             del df2[i]
@@ -123,7 +123,7 @@ class mod_df:
 
         df2 = df2[:1]
 
-        df2 = df2.reindex(sorted(df2.columns, key=lambda x: x.split('_')[2]), axis=1)
+        df2 = df2.reindex(sorted(df2.columns, key=lambda x: x.split('_')[-1]), axis=1)
 
         constant_df = pd.DataFrame(constant_data)
 
@@ -153,7 +153,16 @@ def main(root_dir_path):
 
 
         main_df = main_df.sort_values(by='animal_id')
-        main_df.to_csv('transposed_log_file.csv')
+        tmp_df_right = main_df.iloc[:, 7:]
+        tmp_df_right = tmp_df_right.reindex(sorted(tmp_df_right.columns, key=lambda x: (int(x.split('_')[-1]), int(x.split('_')[0]))), axis=1)
+
+        tmp_df_left = main_df.iloc[:, :7]
+
+        res = pd.concat([tmp_df_left, tmp_df_right], axis=1)
+
+        res.to_csv('transposed_log_files.csv')
+
+        # main_df.to_csv('transposed_log_file.csv')
         print('done!')
         
 parser = argparse.ArgumentParser()
@@ -163,3 +172,4 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     main(args.path)
+    # main('/home/gavin/Downloads/Homecage_Entry_Logs')
