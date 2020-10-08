@@ -39,8 +39,10 @@ class get_files_list:
     def get_files(self):
         base_path = self.root_dir
         for wave in os.listdir(base_path):
-            for f in os.listdir(base_path + os.sep + wave):
-                self.filenames.append(base_path + os.sep + wave + os.sep + f)
+            if 'DS' not in wave:
+                for f in os.listdir(base_path + os.sep + wave):
+                    if 'DS' not in f:
+                        self.filenames.append(base_path + os.sep + wave + os.sep + f)
     
     def get_wave_id_status_day(self, wave, fn):
         split_fn = fn.split('_')
@@ -48,6 +50,8 @@ class get_files_list:
         animal_id = split_fn[0]
         status = split_fn[1]
         day = ''.join([x for x in split_fn[2] if x.isnumeric()])
+        if day == '':
+            day == 'NA'
         return wave, animal_id, status, day
 
 
@@ -141,6 +145,7 @@ def main(root_dir_path):
         main_df = pd.DataFrame()
 
         for csv in gfl.filenames:
+            print(csv)
             wave, animal_id, status, day = gfl.get_wave_id_status_day(csv.split(os.sep)[-2], csv.split(os.sep)[-1].split('.')[0])
             md = mod_df(csv, wave, animal_id, status, day)
             tmp_df = md.create_df()
