@@ -18,9 +18,6 @@ class Detector():
         self.model = self.get_model()
 
     def get_model(self):
-        '''
-        Input shape = (224, 224, 3)
-        '''
         input_shape = (224, 224, 3)
         input = keras.layers.Input(shape=input_shape)
         x = keras.applications.mobilenet_v2.MobileNetV2(include_top=False, weights='imagenet')(input)
@@ -37,6 +34,7 @@ class Detector():
         output = keras.layers.Dense(1, activation='sigmoid')(x)
         model = keras.Model(inputs=[input], outputs=[output])
         if self.weights_path:
+            print('model weights loaded from pretrained model')
             model.load_weights(self.weights_path)
         opt = keras.optimizers.Adam()
         loss = keras.losses.binary_crossentropy
@@ -57,8 +55,8 @@ class Detector():
             width_shift_range=0.1,
             height_shift_range=0.1,
             vertical_flip=True,
-            zoom_range=[0.8, 1.2],
-            brightness_range=[0.5, 1.2],
+            # zoom_range=[0.8, 1.2],
+            # brightness_range=[0.5, 1.2],
             rescale=1./255.
         )
         datagen.fit(x)
@@ -96,18 +94,29 @@ def test_on_video(video_file):
     video_stream = cv2.VideoCapture(video_file)
     grab, frame = video_stream.read()
     d = Detector("model/model.h5")
+    frame_cnt = 0
     while frame is not None:
-        result = d.predict_on_single_raw_image(frame)
-        cv2.putText(frame,"Confidence: %.4f" % result, (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), lineType=cv2.LINE_AA)
-        if result > 0.5:
-            cv2.putText(frame, "Display" % result, (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),
-                        lineType=cv2.LINE_AA)
+        if frame_cnt % 10 == 0:
+            result = d.predict_on_single_raw_image(frame)
+            cv2.putText(frame,"Confidence: %.4f" % result, (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), lineType=cv2.LINE_AA)
+            if result > 0.5:
+                cv2.putText(frame, "Display" % result, (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),
+                            lineType=cv2.LINE_AA)
+            else:
+                cv2.putText(frame, "Keep still" % result, (40, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0),
+                            lineType=cv2.LINE_AA)
+            print(frame_cnt, result)
+            cv2.imshow("test_on_video", frame)
+            frame_cnt += 1
+            grab, frame = video_stream.read()
         else:
-            cv2.putText(frame, "Keep still" % result, (340, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0),
-                        lineType=cv2.LINE_AA)
-        cv2.imshow("test_on_video", frame)
-        cv2.waitKey(0)
-        grab, frame = video_stream.read()
+            cv2.waitKey(80)
+            grab, frame = video_stream.read()
+            frame_cnt += 1
+        cv2.waitKey(15)
+
+    video_steam.release()
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     # d = Detector()

@@ -405,6 +405,7 @@ def generate_dataset(input_folder, output_folder):
 
             grab, frame = video_stream.read()
 
+# TODO: remember to cvt to 3 channels
 def prepare_for_training(output_folder):
     pos_folder = os.path.join(output_folder, '1')
     neg_folder = os.path.join(output_folder, '0')

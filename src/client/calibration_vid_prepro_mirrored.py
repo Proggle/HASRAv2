@@ -290,8 +290,8 @@ class split_vids_in_thirds:
 
 
 
-sv = split_vids_in_thirds(videos_dir_path, project_name)
-sv.video_file_splitter()
+# sv = split_vids_in_thirds(videos_dir_path, project_name)
+# sv.video_file_splitter()
 
 # dsf = del_single_frames(project_name)
 # dsf.del_corner_singles()
