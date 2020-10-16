@@ -110,7 +110,7 @@ class GUI:
 
 		frame_distance_left2right = Frame(master)
 		for i in range(6):
-			temp_label = Label(frame_distance_left2right, text="distance left 2 right.(R:0 L:10)")
+			temp_label = Label(frame_distance_left2right, text="distance left 2 right.(R:0 L:12)")
 			temp_label.pack(padx=5, side=LEFT)
 		frame_distance_left2right.pack()
 
