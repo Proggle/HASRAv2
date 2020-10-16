@@ -124,7 +124,7 @@ class GUI:
 
 		frame_distance_up2down = Frame(master)
 		for i in range(6):
-			temp_label = Label(frame_distance_up2down, text="distance up 2 down.(D:0 U:12)")
+			temp_label = Label(frame_distance_up2down, text="distance up 2 down.(U:0 D:12)")
 			temp_label.pack(padx=5, side=LEFT)
 		frame_distance_up2down.pack()
 

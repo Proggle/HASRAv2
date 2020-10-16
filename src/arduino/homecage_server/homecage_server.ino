@@ -166,6 +166,7 @@ int displayPellet() {
     if (digitalRead(IRBreakerPin)){
       servo1.detach();return 0;}
     servo1.write(i);
+    servo1Pos = i;
     //delay(SERVO_PULSE_DELAY);
     if (my_delay(SERVO_PULSE_DELAY) == 0){servo1.detach();return 0;}
   }   
@@ -175,13 +176,14 @@ int displayPellet() {
   for (int i = SERVO1_DOWN_POS; i >= SERVO1_UP_POS; i -= 1) {
     if (digitalRead(IRBreakerPin)){servo1.detach();return 0;}
     servo1.write(i);
+    servo1Pos = i;
     //delay(SERVO_PULSE_DELAY);
     if (my_delay(SERVO_PULSE_DELAY) == 0){servo1.detach();return 0;}
   }  
   
   if (my_delay(SERVO_SETTLE_DELAY) == 0){servo1.detach();return 0;}
 
-  servo1Pos = SERVO1_UP_POS;
+  // servo1Pos = SERVO1_UP_POS;
   servo1_up_flag = true;
   servo1.detach();
   return 1;
@@ -428,7 +430,7 @@ void test_servo(){
 
 void test_stepper(){
   zeroStepper_both();
-  moveStepper_both(7, 11, 0);
+  moveStepper_both(0, 0, 0);
 }
 
 void loop(){
