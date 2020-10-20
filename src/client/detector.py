@@ -129,7 +129,7 @@ def test_on_video(video_file):
             grab, frame = video_stream.read()
         else:
             cv2.waitKey(80)
-            cap.write(frame)
+            # cap.write(frame)
             grab, frame = video_stream.read()
             frame_cnt += 1
         cv2.waitKey(15)
