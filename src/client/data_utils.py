@@ -40,6 +40,7 @@ end_time = 29
 
 seed(2020)
 
+
 class VidLoader:
     def __init__(self, project_path, vid_path, start_time, end_time, num_cal_imgs=70):
         self.project_path = project_path
@@ -142,7 +143,6 @@ note1: the delete_frames method must be called after the deeplabcut.calibrate_ca
 note2: make sure that the lines at the bottom to instantiate this class and call its method arent commmented out
 note3: (IMPORTANT) make sure you go over the images after deleting the singles to delete the
        incorrectly labeled corners (and their pairs)
-
 '''
 
 
@@ -191,6 +191,7 @@ class del_single_frames:
         print('deleted {} images from ./[project_name]/calibration_images'.format(del_cnt))
 
         return
+
 
 '''
 This class splits videos along the y-axis into thirds.
@@ -274,10 +275,11 @@ class split_vids_in_thirds:
 
                     cropped_left = cv2.resize(cropped_left, (int(w//3 + 10),int(h)))
                     cropped_mid = cv2.resize(cropped_mid, (int(w//3 + 10),int(h)))
+                    flipped_mid = cv2.flip(cropped_mid, 1)
                     cropped_right = cv2.resize(cropped_right, (int(w//3 + 10),int(h)))
 
                     out1.write(cropped_left)
-                    out2.write(cropped_mid)
+                    out2.write(flipped_mid)
                     out3.write(cropped_right)
 
                     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -301,6 +303,7 @@ note2: You may need to adjust the ROI of the video and possibly the resolution. 
 note3: This saves to 224*224*1 cause that's the optimal input for mobilenetv2 (the other color channels are added later)
 note4: You may need to change the fourcc depending on what your computer is compatible with. Try XVID if MJPG doesnt work.
 '''
+
 
 class crop2Size:
     def __init__(self, input_folder, output_folder):
@@ -348,7 +351,7 @@ class crop2Size:
 
             # fourcc = cv2.VideoWriter_fourcc(*'MJPG') # this doesn't work on the titan computer... idk why
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            out = cv2.VideoWriter(fn, fourcc, fps, (224, 224), False)
+            out = cv2.VideoWriter(fn, fourcc, int(fps), (224, 224), False)
 
             while (True):
                 ret, frame = cap.read()
@@ -356,14 +359,13 @@ class crop2Size:
                     gray = cv2.cvtColor(src=frame, code=cv2.COLOR_BGR2GRAY)
 
                     # pixel coords of pellet cam
-                    start_row, start_col = int(360-224), int((640//2)-(224//2))
-                    end_row, end_col = int(h), int((640//2)+(224//2))
+                    start_row, start_col = int(720 - 448), int((1280 // 2) - (448 // 2))
+                    end_row, end_col = int(h), int((1280 // 2) + (448 // 2))
                     cropped_frame = gray[start_row:end_row, start_col:end_col]
-                    # cropped_frame = frame[start_row:end_row, start_col:end_col]
                     cropped_frame = cv2.resize(cropped_frame, (224, 224))
                     out.write(cropped_frame)
 
-                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                    if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
                         break
                 else:
                     break
@@ -372,6 +374,100 @@ class crop2Size:
             out.release()
             cv2.destroyAllWindows()
 
+'''
+What does this class do?
+This class takes the absolute path to a video and splits it up into multiple videos based on the time frames passed
+in the times_arr argument. If you want to run this on multiple videos use a for loop in the main func.
+'''
+
+class sampleReachVids:
+    def __init__(self, vid_path, start_times_arr, end_times_arr):
+        self.vid_path = vid_path
+        self.start_times_arr = start_times_arr
+        self.end_times_arr = end_times_arr
+        self.recording = False
+
+    def load_vid(self):
+        print(self.vid_path)
+        # Playing video from file:
+        cap = cv2.VideoCapture(self.vid_path)
+        frame_cnt = 0
+        # get height and width from opencv and print to console
+        if cap.isOpened():
+            w = cap.get(3)  # 3 = cv2.CAP_PROP_FRAME_WIDTH
+            h = cap.get(4)  # 4 = cv2.CAP_PROP_FRAME_HEIGHT
+            fps = cap.get(5)  # 5 is FPS and returned 60 (correct)... but 7 is frame count and returned 1206fps for some reason
+            print('video height and width: {}, {}'.format(h, w))
+
+        output_dir = os.getcwd() + os.sep + 'sampled_training_videos'
+        print(f'vids will be saved to {output_dir}')
+
+        # output jpgs will be stored in [your project dir]/calibration_images
+        try:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+        except OSError:
+            print('Error: Creating directory of data')
+
+        starts = [x*fps for x in self.start_times_arr]
+        ends = [x*fps for x in self.end_times_arr]
+
+        left_fn = output_dir + os.sep + 'camera-1_' + self.vid_path[-45:-4] + '_reaches' + '.avi'
+        mid_fn = output_dir + os.sep + 'camera-2_' + self.vid_path[-45:-4] + '_reaches' + '.avi'
+        right_fn = output_dir + os.sep + 'camera-3_' + self.vid_path[-45:-4] + '_reaches' + '.avi'
+        print(left_fn)
+
+        # fourcc = cv2.VideoWriter_fourcc(*'MJPG') # this doesn't work on the titan computer... idk why
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        out1 = cv2.VideoWriter(left_fn, fourcc, fps, (int(w // 3 + 10), int(h)), False)
+        out2 = cv2.VideoWriter(mid_fn, fourcc, fps, (int(w // 3 + 10), int(h)), False)
+        out3 = cv2.VideoWriter(right_fn, fourcc, fps, (int(w // 3 + 10), int(h)), False)
+
+        while (True):
+            ret, frame = cap.read()
+            frame_cnt += 1
+            if frame_cnt in starts:
+                self.recording = True
+            if frame_cnt in ends:
+                self.recording = False
+            if ret:
+                gray = cv2.cvtColor(src=frame, code=cv2.COLOR_BGR2GRAY)
+
+                # pixel coords of left cam
+                start_row, start_col = int(0), int(0)
+                end_row, end_col = int(h), int(w // 3 + 10)
+                cropped_left = gray[start_row:end_row, start_col:end_col]
+
+                # pixel coords of mid cam
+                start_row, start_col = int(0), int(w // 3 - 5)
+                end_row, end_col = int(h), int((w // 3) * 2 + 5)
+                cropped_mid = gray[start_row:end_row, start_col:end_col]
+
+                # pixel coords of right cam
+                start_row, start_col = int(0), int((w // 3) * 2 - 10)
+                end_row, end_col = int(h), int(w)
+                cropped_right = gray[start_row:end_row, start_col:end_col]
+
+                cropped_left = cv2.resize(cropped_left, (int(w // 3 + 10), int(h)))
+                cropped_mid = cv2.resize(cropped_mid, (int(w // 3 + 10), int(h)))
+                flipped_mid = cv2.flip(cropped_mid, 1)
+                cropped_right = cv2.resize(cropped_right, (int(w // 3 + 10), int(h)))
+
+                if self.recording:
+                    out1.write(cropped_left)
+                    out2.write(flipped_mid)
+                    out3.write(cropped_right)
+
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+            else:
+                break
+
+        cap.release()
+        out1.release()
+        out2.release()
+        out3.release()
+        cv2.destroyAllWindows()
 
 def generate_dataset(input_folder, output_folder):
     assert os.path.isdir(input_folder) and os.path.isdir(output_folder)
@@ -383,27 +479,45 @@ def generate_dataset(input_folder, output_folder):
     if not os.path.exists(output_folder_0):
         os.mkdir(output_folder_0)
 
-    # video_files = [os.path.join(input_folder, item) for item in os.listdir(input_folder) if item.endswith('.avi')]
-    video_files = [os.path.join(input_folder, item) for item in os.listdir(input_folder) if item == '2020-01-18_(07-04-58)_002FBE71E101_85136_12950.avi']
+    video_files = [os.path.join(input_folder, item) for item in os.listdir(input_folder) if item.endswith('.avi')]
+    # video_files = [os.path.join(input_folder, item) for item in os.listdir(input_folder) if
+    #                item == '2020-01-18_(07-04-58)_002FBE71E101_85136_12950.avi']
+
+    print(video_files)
+
     for video_file in tqdm(video_files):
         video_stream = cv2.VideoCapture(video_file)
         grab, frame = video_stream.read()
+
+        cnt = 0
+
         while frame is not None:
-            showframe = deepcopy(frame)
-            showframe = cv2.putText(showframe,"1: Display, 2: Do Nothing, 3: Discard", (40, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), lineType=cv2.LINE_AA)
-            cv2.imshow('frame', showframe)
-            img_path = os.path.basename(video_file).replace(".avi", "") + "%d.jpg" % video_stream.get(cv2.CAP_PROP_POS_FRAMES)
-            frame = cv2.resize(frame, (224, 224))
-            if cv2.waitKey(0) == 49:
-                img_path = os.path.join(output_folder_1, img_path)
+            if cnt % 60 == 0:
+                showframe = deepcopy(frame)
+                # text coords were 40, 40
+                showframe = cv2.putText(showframe, "1: Move,2: Idle,3: Discard", (40, 40),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), lineType=cv2.LINE_AA)
+                cv2.imshow('frame', showframe)
+                img_path = os.path.basename(video_file).replace(".avi", "") + "%d.jpg" % video_stream.get(
+                    cv2.CAP_PROP_POS_FRAMES)
                 frame = cv2.resize(frame, (224, 224))
-                cv2.imwrite(img_path, frame)
-            elif cv2.waitKey(0) == 50:
-                img_path = os.path.join(output_folder_0, img_path)
-                frame = cv2.resize(frame, (224, 224))
-                cv2.imwrite(img_path, frame)
+                if cv2.waitKey(0) == 49:
+                    img_path = os.path.join(output_folder_1, img_path)
+                    frame = cv2.resize(frame, (224, 224))
+                    cv2.imwrite(img_path, frame)
+                elif cv2.waitKey(0) == 50:
+                    img_path = os.path.join(output_folder_0, img_path)
+                    frame = cv2.resize(frame, (224, 224))
+                    cv2.imwrite(img_path, frame)
 
             grab, frame = video_stream.read()
+            cnt += 15
+            # if frame is not None:
+            #     print('has frame')
+    
+    time.sleep(3)
+    video_stream.release()
+
 
 # TODO: remember to cvt to 3 channels
 def prepare_for_training(output_folder):
