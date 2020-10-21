@@ -19,6 +19,8 @@ import numpy as np
 from detector import Detector
 import sys
 
+use_detector = False
+
 D = Detector("model/model.h5")
 systemCheck.check_directory_structure()
 # Load all configuration information for running the system.
@@ -368,13 +370,41 @@ class SessionController(object):
             time.sleep(1)
 
             return D.predict_in_real_use(img)
-
+    
+    global use_detector
+    if use_detector:
+        # this is the time before the first presentation after the IR beam is broken. Changed 6 -> 4
+        time.sleep(4)
+        self.arduino_client.serialInterface.write(b'1')
+        self.arduino_client.serialInterface.flushOutput()
+        while True:
+            if self.predict:
+                if (datetime.datetime.now() - raise_moment).seconds >= 4:
+                    SEED_FLAG = detect(p)
+                    print('pellet detector returned : {}'.format(SEED_FLAG))
+                if not SEED_FLAG:
+                    self.arduino_client.serialInterface.write(b'1')
+                    self.arduino_client.serialInterface.flushOutput()
+                    trial_count += 1
+                    time.sleep(4)
+                    if detect(p):
+                        SEED_FLAG = True # do cycling all the time
+                        if "TEST" in profile.name:
+                            SEED_FLAG = False
+                        raise_moment = datetime.datetime.now()
+                        display_time_stamp_list.append(raise_moment)
+                        successful_count += 1
+                    else:
+                        SEED_FLAG = False
+                print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
+    else:
         # this is the time before the first presentation after the IR beam is broken. Changed 6 -> 4
         time.sleep(4)
         while True:
             if self.predict:
                 if (datetime.datetime.now() - raise_moment).seconds >= 4:
-                    SEED_FLAG = detect(p)
+                    # SEED_FLAG = detect(p)
+                    SEED_FLAG = False
                 if not SEED_FLAG:
                     self.arduino_client.serialInterface.write(b'1')
                     self.arduino_client.serialInterface.flushOutput()
@@ -390,41 +420,18 @@ class SessionController(object):
                     else:
                         SEED_FLAG = False
                 print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
-
-        # # this is the time before the first presentation after the IR beam is broken. Changed 6 -> 4
-        # time.sleep(4)
-        # while True:
-        #     if self.predict:
-        #         if (datetime.datetime.now() - raise_moment).seconds >= 4:
-        #             # SEED_FLAG = detect(p)
-        #             SEED_FLAG = False
-        #         if not SEED_FLAG:
-        #             self.arduino_client.serialInterface.write(b'1')
-        #             self.arduino_client.serialInterface.flushOutput()
-        #             trial_count += 1
-        #             time.sleep(4)
-        #             if detect(p):
-        #                 SEED_FLAG = False # do cycling all the time
-        #                 if "TEST" in profile.name:
-        #                     SEED_FLAG = False
-        #                 raise_moment = datetime.datetime.now()
-        #                 display_time_stamp_list.append(raise_moment)
-        #                 successful_count += 1
-        #             else:
-        #                 SEED_FLAG = False
-        #         print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
-        #     else:
-        #         if (datetime.datetime.now() - raise_moment).seconds >= 5:
-        #             if profile.dominant_hand == "LEFT":
-        #                 self.arduino_client.serialInterface.write(b'1')
-        #             elif profile.dominant_hand == "RIGHT":
-        #                 self.arduino_client.serialInterface.write(b'2')
-        #             elif profile.dominant_hand == "BOTH":
-        #                 self.arduino_client.serialInterface.write(b'4')
-        #             raise_moment = datetime.datetime.now()
-        #             trial_count += 1
-        #             display_time_stamp_list.append(raise_moment)
-        #             time.sleep(1)
+            else:
+                if (datetime.datetime.now() - raise_moment).seconds >= 5:
+                    if profile.dominant_hand == "LEFT":
+                        self.arduino_client.serialInterface.write(b'1')
+                    elif profile.dominant_hand == "RIGHT":
+                        self.arduino_client.serialInterface.write(b'2')
+                    elif profile.dominant_hand == "BOTH":
+                        self.arduino_client.serialInterface.write(b'4')
+                    raise_moment = datetime.datetime.now()
+                    trial_count += 1
+                    display_time_stamp_list.append(raise_moment)
+                    time.sleep(1)
 
             # Check if message has arrived from server, if it has, check if it is a TERM message.
             if self.arduino_client.serialInterface.in_waiting > 0:
