@@ -397,6 +397,17 @@ class SessionController(object):
                         else:
                             SEED_FLAG = False
                     print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
+
+                # Check if message has arrived from server, if it has, check if it is a TERM message.
+                if self.arduino_client.serialInterface.in_waiting > 0:
+                    serial_msg = self.arduino_client.serialInterface.readline().rstrip().decode()
+                    print("=========================================================")
+                    print("receive message from arduino: %s" % serial_msg)
+                    print("=========================================================")
+                    if serial_msg == "TERM":
+                        self.arduino_client.serialInterface.flush()
+                        self.arduino_client.serialInterface.flushInput()
+                        break
         else:
             # this is the time before the first presentation after the IR beam is broken. Changed 6 -> 4
             time.sleep(4)
