@@ -508,22 +508,25 @@ def launch_gui():
 # COM1 is the arduino, COM2 is the RFID tag reader
 def sys_init():
     # print(PROFILE_SAVE_DIRECTORY)
-
-    ard_port, rfid_port = get_com_ports()
+    use_scanner = True
+    if use_scanner:
+        ard_port, rfid_port = get_com_ports()
 
     profile_list = loadAnimalProfiles(PROFILE_SAVE_DIRECTORY)
-    # if len(sys.argv) == 3:
-    #     COM1 = str(sys.argv[1])
-    #     COM2 = str(sys.argv[2])
-    # else:
-    #     COM1 = '8'
-    #     COM2 = '6'
+    if not use_scanner:
+        if len(sys.argv) == 3:
+            COM1 = str(sys.argv[1])
+            COM2 = str(sys.argv[2])
+        else:
+            COM1 = '8'
+            COM2 = '6'
     print('If your program is stuck here please check COM port configuration in main.pys sys_init func')
-    # arduino_client = arduinoClient.client("COM" + COM1, 9600)
-    # ser = serial.Serial('COM' + COM2, 9600)
-
-    arduino_client = arduinoClient.client(ard_port, 9600)
-    ser = serial.Serial(rfid_port, 9600)
+    if not use_scanner:
+        arduino_client = arduinoClient.client("COM" + COM1, 9600)
+        ser = serial.Serial('COM' + COM2, 9600)
+    else:
+        arduino_client = arduinoClient.client(ard_port, 9600)
+        ser = serial.Serial(rfid_port, 9600)
 
     guiProcess = launch_gui()
     session_controller = SessionController(profile_list, arduino_client)
