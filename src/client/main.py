@@ -21,6 +21,12 @@ from detector import Detector
 import sys
 
 use_detector = False
+run_google_drive_script = False
+
+if run_google_drive_script:
+    Popen([
+        'python', 'googleDriveManager.py'
+    ])
 
 D = Detector("model/model.h5")
 systemCheck.check_directory_structure()
