@@ -10,6 +10,7 @@ import systemCheck
 import time
 import multiprocessing
 import serial
+import serial.tools.list_ports
 from subprocess import PIPE, Popen
 import os
 import datetime
@@ -30,6 +31,18 @@ dirpath = os.getcwd()
 base_dir = dirpath.split('src'+os.sep+'client')[0]
 PROFILE_SAVE_DIRECTORY = os.path.join(base_dir, 'AnimalProfiles')
 
+def get_com_ports():
+    ard_port = 'COMx'
+    rfid_port = 'COMx'
+    
+    ports = list(serial.tools.list_ports.comports())
+    for p in ports:
+        if 'CH340' in p.description:
+            ard_port = p[0]
+        if 'CH340' not in p.description and p[0] != 'COM1':
+            rfid_port = p[0]
+
+    return ard_port, rfid_port
 
 # This function generates a list of AnimalProfiles found inside <profile_save_directory>.
 # It then reads the save.txt file for each profile found, and uses the information
@@ -377,12 +390,15 @@ class SessionController(object):
             time.sleep(4)
             self.arduino_client.serialInterface.write(b'1')
             self.arduino_client.serialInterface.flushOutput()
+
+            # SEED_FLAG == True means it should retrieve another pellet
+
             while True:
                 if self.predict:
                     if (datetime.datetime.now() - raise_moment).seconds >= 4:
                         SEED_FLAG = detect(p)
                         print('pellet detector returned : {}'.format(SEED_FLAG))
-                    if not SEED_FLAG:
+                    if SEED_FLAG:
                         self.arduino_client.serialInterface.write(b'1')
                         self.arduino_client.serialInterface.flushOutput()
                         trial_count += 1
@@ -394,9 +410,9 @@ class SessionController(object):
                             raise_moment = datetime.datetime.now()
                             display_time_stamp_list.append(raise_moment)
                             successful_count += 1
+                            print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
                         else:
                             SEED_FLAG = False
-                    print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
 
                 # Check if message has arrived from server, if it has, check if it is a TERM message.
                 if self.arduino_client.serialInterface.in_waiting > 0:
@@ -492,16 +508,22 @@ def launch_gui():
 # COM1 is the arduino, COM2 is the RFID tag reader
 def sys_init():
     # print(PROFILE_SAVE_DIRECTORY)
+
+    ard_port, rfid_port = get_com_ports()
+
     profile_list = loadAnimalProfiles(PROFILE_SAVE_DIRECTORY)
-    if len(sys.argv) == 3:
-        COM1 = str(sys.argv[1])
-        COM2 = str(sys.argv[2])
-    else:
-        COM1 = '8'
-        COM2 = '6'
+    # if len(sys.argv) == 3:
+    #     COM1 = str(sys.argv[1])
+    #     COM2 = str(sys.argv[2])
+    # else:
+    #     COM1 = '8'
+    #     COM2 = '6'
     print('If your program is stuck here please check COM port configuration in main.pys sys_init func')
-    arduino_client = arduinoClient.client("COM" + COM1, 9600)
-    ser = serial.Serial('COM' + COM2, 9600)
+    # arduino_client = arduinoClient.client("COM" + COM1, 9600)
+    # ser = serial.Serial('COM' + COM2, 9600)
+
+    arduino_client = arduinoClient.client(ard_port, 9600)
+    ser = serial.Serial(rfid_port, 9600)
 
     guiProcess = launch_gui()
     session_controller = SessionController(profile_list, arduino_client)
