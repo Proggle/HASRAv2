@@ -19,9 +19,11 @@ from googleDriveManager import is_locked
 import numpy as np
 from detector import Detector
 import sys
+from collections import deque
 
 use_detector = False
 run_google_drive_script = False
+pellet_wait_time_hard_limit = 25
 
 if run_google_drive_script:
     Popen([
@@ -391,34 +393,50 @@ class SessionController(object):
             return D.predict_in_real_use(img)
     
         global use_detector
+        global pellet_wait_time_hard_limit
         if use_detector:
             # this is the time before the first presentation after the IR beam is broken. Changed 6 -> 4
             time.sleep(4)
             self.arduino_client.serialInterface.write(b'1')
             self.arduino_client.serialInterface.flushOutput()
-
+            SEED_FLAG = False
+            detect_cnts = deque([0, 0, 0])
             # SEED_FLAG == True means it should retrieve another pellet
 
             while True:
                 if self.predict:
-                    if (datetime.datetime.now() - raise_moment).seconds >= 4:
-                        SEED_FLAG = detect(p)
-                        print('pellet detector returned : {}'.format(SEED_FLAG))
+                    if (datetime.datetime.now() - raise_moment).seconds >= 0.5:
+                        detect_cnts.popleft()
+                        detect_cnts.append(detect(p))
+                        if sum(detect_cnts) < 2:
+                            time.sleep(0.5)
+                        else:
+                            SEED_FLAG = True
+                            print('pellet detector cant see a pellet... lowering arm')
+
+                    if (datetime.datetime.now() - raise_moment).seconds >= pellet_wait_time_hard_limit:
+                        print(f'{pellet_wait_time_hard_limit} seconds have passed, presenting new pellet')
+                        SEED_FLAG = True
+
                     if SEED_FLAG:
                         self.arduino_client.serialInterface.write(b'1')
                         self.arduino_client.serialInterface.flushOutput()
+                        raise_moment = datetime.datetime.now()
                         trial_count += 1
-                        time.sleep(4)
-                        if detect(p):
-                            SEED_FLAG = True # do cycling all the time
-                            if "TEST" in profile.name:
-                                SEED_FLAG = False
-                            raise_moment = datetime.datetime.now()
-                            display_time_stamp_list.append(raise_moment)
-                            successful_count += 1
-                            print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
-                        else:
-                            SEED_FLAG = False
+                        display_time_stamp_list.append(raise_moment)
+                        SEED_FLAG = False
+                        detect_cnts[0], detect_cnts[1], detect_cnts[2] = 0,0,0
+                        time.sleep(0.5)
+                        # if detect(p):
+                        #     SEED_FLAG = True # do cycling all the time
+                        #     if "TEST" in profile.name:
+                        #         SEED_FLAG = False
+                        #     raise_moment = datetime.datetime.now()
+
+                        #     successful_count += 1
+                        #     print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
+                        # else:
+                        #     SEED_FLAG = False
 
                 # Check if message has arrived from server, if it has, check if it is a TERM message.
                 if self.arduino_client.serialInterface.in_waiting > 0:
