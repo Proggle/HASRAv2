@@ -50,41 +50,53 @@ https://github.com/SilasiLab/HomecageSinglePellet_Manual
 	- `pip install psutil`
 	
 
-5. `git clone https://github.com/SilasiLab/HomeCageSinglePellet_server.git`
-6. `pip install /path/to/HASRA/dependencies/opencv_python-4.1.2+contrib-cp36-cp36m-win_amd64.whl`
-7. Add ID of cage to the name of folder as postfix. (Rname the folder of the downloaded reporsitory as HASRA_[id]).
+5. Make sure you have git install. cd to the folder you want to have HASRA in.
+   `git clone https://github.com/SilasiLab/HASRAv2.git`
+6. `pip install /path/to/HASRA/dependencies/opencv_python-4.1.2+contrib-cp36-cp36m-win_amd64.whl` or you can just pip install
+   opencv with `pip install opencv-python`. Currently we are using opencv v4.4.x
+7. Add ID of cage to the name of folder as postfix. (Rename the folder of the downloaded reporsitory as HASRA_[id]).
 8. Create folders and profiles of the animals by running the  `genProfiles.py `
 	- `conda activate [name of your environment]`
 	- `cd /path/to/HASRA/src/client`
 	- `python genProfiles.py`
+9. If you don't know the RFID tag numbers for your tags you can run the task and scan each tag individually.
+   The numbers will be printed to the console. Then you can go to /HASRA_[cage number]/AnimalProfiles/MOUSE1.
+   Open up the .txt file in that folder and edit the first line to be the RFID tag number. Do this for each mouse.
+
+
 # **Assembly:**
 
 The detailed assembly manual can be found here:
 https://github.com/SilasiLab/HomeCageSinglePellet_server/blob/master/Homecage%20assembly%20manual.pdf
 
 
-
 # **Usage**:
 ### **Running the Device**
 1. Enter the virtual environment that the system was installed in by typing `conda activate <my_env>` into a terminal.
 
-2. Optional: Use `cd` to navigate to` HomeCageSinglePellet_server/src/client/` and then run `python -B genProfiles.py`. The text prompts will walk you through entering your new animals into the system. Since the folder and the file are already inclued in this repo, this step is optional.
+2. Optional: Use `cd` to navigate to` HASRA_[cage number]/src/client/` and then run `python -B genProfiles.py`. The text prompts will walk you through entering your new animals into the system. Since the folder and the file are already inclued in this repo, this step is optional.
 
-3. Open HomeCageSinglePellet_server/config/config.txt and set the system configuration you want.
+3. Open HASRA_[cage number]/config/config.txt and set the system configuration you want.
 
-4. Find the COM port ids for Arduino and RFID reader, using `mode` command in terminal.
-(In linux: Arduino needs to be USB0 , and RFID reader needs to be USB1. You can see connected USB devices with terminal command:
-ls /dev/tty* and You need to replace the COMs in main.py -> `sys_init()` function manually.) 
+4. This step is now optional, as there is a COM port scanner feature in the code now.
+   Skip this step for now and come back if the task hangs on startup and the console
+   indicates that you should check COM ports.
+   
+   Find the COM port ids for Arduino and RFID reader, using `mode` command in terminal.
+   (In linux: Arduino needs to be USB0 , and RFID reader needs to be USB1. You can see connected USB devices with terminal command:
+   ls /dev/tty* and You need to replace the COMs in main.py -> `sys_init()` function manually.) 
   
-5. Open a termanal and run following command:
-* `cd \your\path\to\HomeCageSinglePellet_server\src\client\`
+5. Open a terminal and run following command:
+* `cd \your\path\to\HASRA_[cage number]\src\client\`
 * `conda activate YourEnvironment` replace YourEnvironment by the name of your environment.
+* `python main.py`
+   if you want to explicitly pass the COM ports in CLI you can run main.py with the following arguments.
 * `python main.py COM-arduino COM-RFID` replace COM-arduino and COM-RFID by the COM ids of Arduino and RFID respectively.
 
 
-6. Optional: If you have a google file stream mounted on this computer, you can choose to upload all the viedos and log files to google drive. You need firstly find out the local path to this google drive folder, in this case it is: `G:\Shared drives\SilasiLabGdrive`.
-Since there could be mutiple cage running on the same computer and they can also be stored in the same google cloud folder. You can add a suffix to the project foler name by changing the root folder name from `HomeCageSinglePellet_server` to `HomeCageSinglePellet_server_id`(replace the id by your id) 
-In the same folder, open another terminal and activate the virtual environment again, then run `python googleDriveManager.py \path\to\your\cloud\drive\folder`.
+6. Optional: If you have a google file stream mounted on this computer, you can choose to upload all the viedos and log files to google drive. You need firstly find out the local path to this google drive folder, in our case it is: `G:\Shared drives\SilasiLabGdrive`.
+Since there could be mutiple cages running on the same computer and they can also be stored in the same google cloud folder. You can add a suffix to the project folder name by changing the root folder name from `HASRA` to `HASRA_[cage number]` 
+In the same folder, open another terminal window, activate the virtual environment again (if needed), then run `python googleDriveManager.py \path\to\your\cloud\drive\folder`.
 The videos and the log files will be stored in `your cloud drive\homecage_id_sync`.
 
 7. You need to put in the RFID tag numbers manually into the profiles. Take mouse 1 as an instance, you need to replace the first line in `HomeCageSinglePellet_server\AnimalProfiles\MOUSE1\MOUSE1_save.txt`. If you do not know your tag number, don't worry. You can scan it on the RFID reader, it will be printed in the Terminal as `[tag number] not recognized`.
@@ -94,7 +106,7 @@ The videos and the log files will be stored in `your cloud drive\homecage_id_syn
 
 9. To shut the system down cleanly; 
 
-	- Ensure no sessions are currently running. 
+	- Ensure no sessions are currently running and that the motors have all moved back to their default positions. 
 	- Press the quit button on the GUI.
 	- Ctrl+c out of the program running in the terminal.
 
@@ -103,5 +115,5 @@ The videos and the log files will be stored in `your cloud drive\homecage_id_syn
 
 * Is everything plugged in?
 * Make sure you are in the correct virtual environment.
-* Make sure the HomeCageSinglePellet/config/config.txt file contains the correct configuration. (If the file gets deleted it will be replaced by a default version at system start)
-* Make sure there are 1 to 5 profiles in the HomeCageSinglePellet/AnimalProfiles/ directory. Ensure these profiles contain all the appropriate files and that the save.txt file for each animal contains the correct information. 
+* Make sure the HASRA_[cage number]/config/config.txt file contains the correct configuration. (If the file gets deleted it will be replaced by a default version at system start)
+* Make sure there are 1 to 5 profiles in the HASRA_[cage number]/AnimalProfiles/ directory. Ensure these profiles contain all the appropriate files and that the save.txt file for each animal contains the correct information. 
