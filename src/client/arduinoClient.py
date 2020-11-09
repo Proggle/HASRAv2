@@ -4,13 +4,10 @@
     Organization: University of Ottawa (Silasi Lab)
 """
 
-
 import serial
 from time import sleep
 
 class client(object):
-
-
     def __init__(self, arduinoSerialPortPath, baudrate):
 
         # Open serial connection with periphral board (Note: Arduino will reset
@@ -37,4 +34,3 @@ class client(object):
         RFID = self.serialInterface.readline().rstrip().decode()
         self.serialInterface.flushInput()
         return RFID
-

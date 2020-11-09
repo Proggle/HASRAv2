@@ -4,6 +4,7 @@
     Organization: University of Ottawa (Silasi Lab)
     This script will update the recorded video onto google drive.
 '''
+
 from time import sleep
 import time
 from copy import copy
@@ -11,7 +12,6 @@ import os
 import psutil
 import sys
 import ctypes
-
 
 def copyLargeFile(src, dest, buffer_size=int(8*1e6)):
     '''
@@ -54,7 +54,6 @@ def work_in_free_time(window_length=5, interval=3, threshold=0.6):
 def check_google_drive_status(path):
     return os.access(path, os.W_OK)
 
-
 def check_safe_file(loacl_file_path):
     baseName = os.path.basename(loacl_file_path)
     rootdir = loacl_file_path.replace(baseName, '')
@@ -84,8 +83,6 @@ def check_safe_file(loacl_file_path):
                 return True
         else:
             return True
-
-
 
 def googleDriveManager(interval=20, min_interval=10, cage_id=1, mice_n=4, gdrive_local=r"G:\Shared drives\Home Cage Reaching"):
 

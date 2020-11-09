@@ -1,3 +1,9 @@
+"""
+    Author: Junzheng Wu, Gavin Heidenreich
+    Email: jwu220@uottawa.ca, gheidenr@uottawa.ca
+    Organization: University of Ottawa (Silasi Lab)
+"""
+
 from warnings import simplefilter 
 simplefilter(action='ignore', category=FutureWarning)
 simplefilter(action='ignore', category=UserWarning)
@@ -11,6 +17,10 @@ import cv2
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import TensorBoard
 
+# tensorboard wasnt working because of some dependency-hell reason, and isnt worth the time or risk to fix.
+# maybe it will work on your computer, idk
+
+# make sure youre using a relatively balanced training dataset
 class Detector():
     def __init__(self, weights_path="None"):
         self.weights_path = None
@@ -46,7 +56,7 @@ class Detector():
         # metric = keras.metrics.AUC()
         # tensorboard = TensorBoard(log_dir="logs/{}".format('pellet_detector_10e'))
         model.compile(optimizer=opt, loss=loss, metrics=[metric])
-        model.summary()
+        # model.summary()
         return model
 
     def train(self, x, y, batch_size=32, epoch=20, split=0.1):
@@ -106,7 +116,7 @@ def test_on_video(video_file):
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     # cap = cv2.VideoWriter('detector_sample.avi', fourcc, 30, (640, 360))
     grab, frame = video_stream.read()
-    print(frame.shape)
+    # print(frame.shape)
     d = Detector("model/model.h5")
     frame_cnt = 0
     while frame is not None:
@@ -160,3 +170,4 @@ if __name__ == '__main__':
         print(os.getcwd())
         # test_on_video('/mnt/4T/dlc_reaching_3d/2020-01-27_(11-26-05)_00784A16A581_86885_18892.avi')
         test_on_video('/home/silasi/3_mirror_homecage/detector_files/videos_for_testing/2020-10-20_(05-34-06)_00784A161B3F_17_3530.avi')
+        

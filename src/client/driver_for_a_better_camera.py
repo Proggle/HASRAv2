@@ -1,6 +1,6 @@
 """
-    Author: Junzheng Wu
-    Email: jwu220@uottawa.ca
+    Author: Junzheng Wu, Gavin Heidenreich
+    Email: jwu220@uottawa.ca, gheidenr@uottawa.ca
     Organization: University of Ottawa (Silasi Lab)
 
     To increase FPS, the whole stream is divided into two parallel threads.
@@ -54,12 +54,10 @@ class FPS_camera:
 
 class WebcamVideoStream:
     def __init__(self, src=0, width=1280, height=720):
-    # def __init__(self, src=0, width=640, height=240):
-
         # If you are under windows system using Dshow as backend
         if platform.system() == 'Windows':
             self.stream = cv2.VideoCapture(src, cv2.CAP_DSHOW)
-            print(self.stream.isOpened())
+            # print(self.stream.isOpened())
             self.width = width
             self.height = height
             ret1 = self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, self.width) #640
@@ -70,7 +68,7 @@ class WebcamVideoStream:
         # If not go next line
         else:
             self.stream = cv2.VideoCapture(src)
-            print(self.stream.isOpened())
+            # print(self.stream.isOpened())
             self.width = width
             self.height = height
             ret1 = self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
@@ -78,8 +76,6 @@ class WebcamVideoStream:
             ret3 = self.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, -5) # was 0.25
             print("camera")
             ret4 = self.stream.set(cv2.CAP_PROP_EXPOSURE, 0.001)
-
-
 
         ret5 = self.stream.set(cv2.CAP_PROP_AUTOFOCUS, 0)
         ret6 = self.stream.set(cv2.CAP_PROP_BRIGHTNESS, 0.0)

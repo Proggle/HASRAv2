@@ -1,6 +1,6 @@
 """
-    Author: Julian Pitney, Junzheng Wu
-    Email: JulianPitney@gmail.com, jwu220@uottawa.ca
+    Author: Julian Pitney, Junzheng Wu, Gavin Heidenreich
+    Email: JulianPitney@gmail.com, jwu220@uottawa.ca, gheidenr@uottawa.ca
     Organization: University of Ottawa (Silasi Lab)
 """
 
@@ -21,9 +21,17 @@ from detector import Detector
 import sys
 from collections import deque
 
+# set to True if you want to use object detection mobilenet to decide when
+#  to lower the arm
 use_detector = False
-run_google_drive_script = False
+
+# This is the max time the arm can idle in the up position before lowering
+#  (only needed when use_detector == True)
 pellet_wait_time_hard_limit = 25
+
+# I recommend not setting this to True and just running the script in its
+# own cmd prompt window, the feature is available nonetheless
+run_google_drive_script = False
 
 if run_google_drive_script:
     Popen([
@@ -32,13 +40,18 @@ if run_google_drive_script:
 
 D = Detector("model/model.h5")
 systemCheck.check_directory_structure()
+
 # Load all configuration information for running the system.
 # Note: Configuration information for data analysis does not come from here.
-
 dirpath = os.getcwd()
 base_dir = dirpath.split('src'+os.sep+'client')[0]
 PROFILE_SAVE_DIRECTORY = os.path.join(base_dir, 'AnimalProfiles')
 
+# This performs a COM port scan and reads their descriptions to find which 
+# port the arduino is in and which port the RFID tag read is in
+# these ports are needed later in the sys_init function
+# if this function stops working and you need to run the task, you can set the variables explicitly
+# in sys_init. You can use the arduino IDE to figure out which port is which
 def get_com_ports():
     ard_port = 'COMx'
     rfid_port = 'COMx'
@@ -392,6 +405,19 @@ class SessionController(object):
 
             return D.predict_in_real_use(img)
     
+
+        # This is the main loop for the pellet detector. Basically there is a deque to keep track of
+        # the 1.5 second running average of the output from the pellet detector (3 detections). If the
+        # pellet detector doesnt see a pellet >= 2/3x it will set SEED_FLAG to True and send a message to
+        # the arduino to lower the arm. You can play around with the interval the pellet detector runs at and
+        # the threshold of the running average, and the duration of the running average.
+        #
+        # SEED_FLAG == True ... the arm will lower and retrieve a new pellet
+        # SEED_FLAG == False ... the arm will stay idle until the detector cant see a pellet or pellet_wait_time_hard_limit
+        # is reached
+
+        # TODO: get this program to stop printing out the img.shape to console... no idea why its doing that so frequently
+
         global use_detector
         global pellet_wait_time_hard_limit
         if use_detector:
@@ -401,7 +427,6 @@ class SessionController(object):
             self.arduino_client.serialInterface.flushOutput()
             SEED_FLAG = False
             detect_cnts = deque([0, 0, 0])
-            # SEED_FLAG == True means it should retrieve another pellet
 
             while True:
                 if self.predict:
@@ -427,16 +452,6 @@ class SessionController(object):
                         SEED_FLAG = False
                         detect_cnts[0], detect_cnts[1], detect_cnts[2] = 0,0,0
                         time.sleep(0.5)
-                        # if detect(p):
-                        #     SEED_FLAG = True # do cycling all the time
-                        #     if "TEST" in profile.name:
-                        #         SEED_FLAG = False
-                        #     raise_moment = datetime.datetime.now()
-
-                        #     successful_count += 1
-                        #     print("Total trial: %d, successful trial: %d, Percentage; %.3f" % (trial_count, successful_count, float(successful_count) / float(trial_count)))
-                        # else:
-                        #     SEED_FLAG = False
 
                 # Check if message has arrived from server, if it has, check if it is a TERM message.
                 if self.arduino_client.serialInterface.in_waiting > 0:
@@ -521,7 +536,10 @@ def scale_stepper_dist(distance):
     else:
         simple_dict = {16: 'g', 17: 'h', 18: 'i', 19: 'j', 20: 'k'}
         return simple_dict[distance]
+
 # Just a wrapper to launch the configuration GUI in its own process.
+# if you are trying to run in headless mode comment out the contents of this function
+# so that the gui doesnt launch
 def launch_gui():
     gui_process = multiprocessing.Process(target=gui.start_gui_loop, args=(PROFILE_SAVE_DIRECTORY,))
     gui_process.start()
@@ -530,6 +548,10 @@ def launch_gui():
 
 # This function initializes all the high level system components, returning a handle to each one.
 # COM1 is the arduino, COM2 is the RFID tag reader
+# use scanner does a brute force scan of COM ports and then matches the device to the COM port
+# using the contents of their descriptions.
+# IMPORTANT NOTE: this feature may break if versioning changes. You can either modify the function to print out
+# the descriptions again and change what the get_com_ports() function looks for in descriptions, or simply turn it off
 def sys_init():
     # print(PROFILE_SAVE_DIRECTORY)
     use_scanner = True
@@ -576,7 +598,6 @@ def listen_for_rfid(ser):
 
 
 def main():
-
     global mouse1TrialLimit, mouse2TrialLimit, mouse3TrialLimit, mouse4TrialLimit, mouse5TrialLimit
     global mouse1TrialsToday, mouse2TrialsToday, mouse3TrialsToday, mouse4TrialsToday, mouse5TrialsToday
 
@@ -589,8 +610,8 @@ def main():
     # Once it receives an RFID, it parses it and searches for a profile with a matching RFID. If a profile
     # is found, it starts a session for that profile. If no profile is found, it goes back to listening for
     # an RFID.
-    while True:
 
+    while True:
         # Block until RFID is received
         print("Waiting for RFID...")
         RFID_code = listen_for_rfid(ser)[:12]
@@ -641,7 +662,6 @@ def main():
                     continue
                 else:
                     mouse5TrialsToday += 1
-
 
             # Start a session on Arduino server side. <A> is the magic byte that tells the Arduino to start a session.
             arduino_client.serialInterface.flushInput()

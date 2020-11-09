@@ -1,3 +1,9 @@
+"""
+    Author: Gavin Heidenreich
+    Email: gheidenr@uottawa.ca
+    Organization: University of Ottawa (Silasi Lab)
+"""
+
 from collections import Counter, defaultdict
 import cv2
 import numpy as np

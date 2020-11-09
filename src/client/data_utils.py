@@ -1,3 +1,9 @@
+"""
+    Author: Junzheng Wu, Gavin Heidenreich
+    Email: jwu220@uottawa.ca, gheidenr@uottawa.ca
+    Organization: University of Ottawa (Silasi Lab)
+"""
+
 import cv2
 import os
 from copy import deepcopy

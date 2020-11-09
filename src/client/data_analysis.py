@@ -1,3 +1,9 @@
+"""
+    Author: Gavin Heidenreich
+    Email: gheidenr@uottawa.ca
+    Organization: University of Ottawa (Silasi Lab)
+"""
+
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
