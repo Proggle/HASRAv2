@@ -551,6 +551,154 @@ def prepare_for_training(output_folder):
     y = y[index]
     return x, y
 
+
+class thirds_w_handedness:
+    def __init__(self, input_videos_dir):
+        self.input_videos_dir = input_videos_dir
+        self.handedness_lookup = self.get_handedness()
+
+    def get_handedness(self):
+        handedness_lookup = defaultdict(str)
+        try:
+            with open('../handedness.txt') as f:
+                lines = f.readlines()
+                for l in lines:
+                    l = l.replace('\n', '')
+                    tmp = l.split(' ')
+                    handedness_lookup[tmp[0]] = tmp[1]
+        except IOError:
+            print('handedness.txt file not found')
+            print('please touch file and place ../[this script] or change pathing in this script')
+
+        return handedness_lookup
+
+    def video_file_splitter(self):
+        # output avis will be stored in [cwd]/train_pro
+        output_dir = os.getcwd() + os.sep + 'train_pro'
+
+        try:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+        except OSError:
+            print('Error: Creating directory of data')
+
+
+        vids2split = []
+        num_vids = 0
+        for f in os.listdir(os.getcwd() + os.sep + self.input_videos_dir):
+            if f[-3:] == 'mp4' or f[-3:] == 'avi':
+                vids2split.append(f)
+                num_vids += 1
+        if num_vids < 1:
+            print('videos not found: please check path to videos folder and try again')
+        else:
+            print('splitting {} video(s)'.format(num_vids))
+
+        while vids2split:
+            curr = vids2split.pop()
+
+            cap = cv2.VideoCapture(
+                os.getcwd() + os.sep + self.input_videos_dir + os.sep + curr)
+
+            # get height and width from opencv
+            if cap.isOpened():
+                w = cap.get(3)  # 3 = cv2.CAP_PROP_FRAME_WIDTH
+                h = cap.get(4)  # 4 = cv2.CAP_PROP_FRAME_HEIGHT
+                fps = cap.get(5)  # 5 is FPS and returned 60 (correct)
+                print('video height and width: {}, {}'.format(h, w))
+                print('fps: ', fps)
+
+            left_fn = output_dir + os.sep + 'camera-1-' + curr[:-4] + '.avi'
+            mid_fn = output_dir + os.sep + 'camera-2-' + curr[:-4] + '.avi'
+            right_fn = output_dir + os.sep + 'camera-3-' + curr[:-4] + '.avi'
+
+            # left_fn = output_dir + os.sep + 'camera-1-' + curr[:-4] + '.mp4'
+            # mid_fn = output_dir + os.sep + 'camera-2-' + curr[:-4] + '.mp4'
+            # right_fn = output_dir + os.sep + 'camera-3-' + curr[:-4] + '.mp4'
+
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            out1 = cv2.VideoWriter(left_fn, fourcc, fps, (int(w // 3 + 10), int(h)), False)
+            out2 = cv2.VideoWriter(mid_fn, fourcc, fps, (int(w // 3 + 10), int(h)), False)
+            out3 = cv2.VideoWriter(right_fn, fourcc, fps, (int(w // 3 + 10), int(h)), False)
+
+            RFID = curr[:-4].split('_')[-3]
+            if self.handedness_lookup[RFID] == 'R':
+                while (True):
+                    ret, frame = cap.read()
+                    if ret:
+                        gray = cv2.cvtColor(src=frame, code=cv2.COLOR_BGR2GRAY)
+
+                        # pixel coords of left cam
+                        start_row, start_col = int(0), int(0)
+                        end_row, end_col = int(h), int(w // 3 + 10)
+                        cropped_left = gray[start_row:end_row, start_col:end_col]
+
+                        # pixel coords of mid cam
+                        start_row, start_col = int(0), int(w // 3 - 5)
+                        end_row, end_col = int(h), int((w // 3) * 2 + 5)
+                        cropped_mid = gray[start_row:end_row, start_col:end_col]
+
+                        # pixel coords of right cam
+                        start_row, start_col = int(0), int((w // 3) * 2 - 10)
+                        end_row, end_col = int(h), int(w)
+                        cropped_right = gray[start_row:end_row, start_col:end_col]
+
+                        cropped_left = cv2.resize(cropped_left, (int(w // 3 + 10), int(h)))
+                        cropped_mid = cv2.resize(cropped_mid, (int(w // 3 + 10), int(h)))
+                        flipped_mid = cv2.flip(cropped_mid, 1)
+                        cropped_right = cv2.resize(cropped_right, (int(w // 3 + 10), int(h)))
+
+                        out1.write(cropped_left)
+                        out2.write(flipped_mid)
+                        out3.write(cropped_right)
+
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
+                    else:
+                        break
+            else:
+                while (True):
+                    ret, frame = cap.read()
+                    if ret:
+                        gray = cv2.cvtColor(src=frame, code=cv2.COLOR_BGR2GRAY)
+                        gray = cv2.flip(gray, 1)
+
+                        # pixel coords of left cam
+                        start_row, start_col = int(0), int(0)
+                        end_row, end_col = int(h), int(w // 3 + 10)
+                        cropped_left = gray[start_row:end_row, start_col:end_col]
+
+                        # pixel coords of mid cam
+                        start_row, start_col = int(0), int(w // 3 - 5)
+                        end_row, end_col = int(h), int((w // 3) * 2 + 5)
+                        cropped_mid = gray[start_row:end_row, start_col:end_col]
+
+                        # pixel coords of right cam
+                        start_row, start_col = int(0), int((w // 3) * 2 - 10)
+                        end_row, end_col = int(h), int(w)
+                        cropped_right = gray[start_row:end_row, start_col:end_col]
+
+                        cropped_left = cv2.resize(cropped_left, (int(w // 3 + 10), int(h)))
+                        cropped_mid = cv2.resize(cropped_mid, (int(w // 3 + 10), int(h)))
+                        flipped_mid = cv2.flip(cropped_mid, 1)
+                        cropped_right = cv2.resize(cropped_right, (int(w // 3 + 10), int(h)))
+
+                        out1.write(cropped_left)
+                        out2.write(flipped_mid)
+                        out3.write(cropped_right)
+
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
+                    else:
+                        break
+
+            cap.release()
+            out1.release()
+            out2.release()
+            out3.release()
+            cv2.destroyAllWindows()
+
+
 if __name__ == '__main__':
     input_folder = 'raw_vids'
     output_folder = ""
