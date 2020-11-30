@@ -20,6 +20,8 @@ import numpy as np
 from detector import Detector
 import sys
 from collections import deque
+import random
+import ctypes
 
 # set to True if you want to use object detection mobilenet to decide when
 #  to lower the arm
@@ -46,6 +48,8 @@ systemCheck.check_directory_structure()
 dirpath = os.getcwd()
 base_dir = dirpath.split('src'+os.sep+'client')[0]
 PROFILE_SAVE_DIRECTORY = os.path.join(base_dir, 'AnimalProfiles')
+
+ctypes.windll.kernel32.SetConsoleTitleW('main.py')
 
 # This performs a COM port scan and reads their descriptions to find which 
 # port the arduino is in and which port the RFID tag read is in
@@ -522,6 +526,17 @@ class SessionController(object):
             os.remove(tempPath)
         else:
             os.rename(tempPath, vidPath)
+
+        chance_of_save = 4
+        random_draw = random.randint(1, chance_of_save)
+        print('1/{} chance of saving. Video will only save if 1 is drawn'.format(chance_of_save))
+
+        if random_draw != 1:
+            print('{} drawn. video deleted'.format(random_draw))
+            os.remove(vidPath)
+        else:
+            print('1 drawn, video saved')
+
         endTime = time.time()
         profile.insertSessionEntry(startTime, endTime, trial_count, successful_count)
         profile.insertDisplay(display_time_stamp_list)
