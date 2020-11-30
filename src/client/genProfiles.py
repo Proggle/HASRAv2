@@ -1,12 +1,12 @@
 """
-    Author: Julian Pitney, Junzheng Wu
-    Email: JulianPitney@gmail.com, jwu220@uottawa.ca
+    Author: Julian Pitney, Junzheng Wu, Gavin Heidenreich
+    Email: JulianPitney@gmail.com, jwu220@uottawa.ca, gheidenr@uottawa.ca
     Organization: University of Ottawa (Silasi Lab)
 """
 
 import os
 
-def gen_profile(mouseName):
+def gen_profile(mouseName, cageNumber):
 
     if(os.path.isdir(".."+os.sep+".."+os.sep+"AnimalProfiles"+os.sep + str(mouseName))):
         print(mouseName + " already has a profile! Skipping profile creation...")
@@ -14,8 +14,10 @@ def gen_profile(mouseName):
     else:
         print("Creating profile for " + str(mouseName) + "...")
 
-    RFID = input("Enter animal RFID: ")
-    cageNumber = input("Enter cage number: ")
+    # RFID = input("Enter animal RFID: ")
+    # cageNumber = input("Enter cage number: ")
+    RFID = 0
+
     # profileDirectory = input("Enter profile save directory: ")
     profileDirectory = os.path.abspath(".."+os.sep+".."+os.sep+"AnimalProfiles"+os.sep+ str(mouseName))
     mouseName = mouseName
@@ -45,7 +47,27 @@ def gen_profile(mouseName):
     print("Profile created for " + str(mouseName) + "!")
 
 
-for i in range(1,7):
-    gen_profile("MOUSE" + str(i))
+def main():
+    animal_profiles_dir = '..' + os.sep + '..' + os.sep + 'AnimalProfiles'
+    if not os.path.exists(animal_profiles_dir):
+        os.makedirs(animal_profiles_dir)
+
+    cageNumber = input('Enter cage number: ')
+    print('Please remember to add Mouse RFID tag numbers, right now theyre all set to 0)
+    print('This can be done by opening up MOUSE_save.txt for each MOUSE and editing the first line')
+
+    for i in range(1,6):
+        gen_profile("MOUSE" + str(i), cageNumber)
+
+    gen_profile('TEST_TAG', cageNumber)
+
+
+if __name__ == '__main__':
+    DEBUG = False
+
+    if DEBUG:
+        pass
+    else:
+        main()
 
 
