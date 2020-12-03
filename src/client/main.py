@@ -404,7 +404,6 @@ class SessionController(object):
             while not check_deetction_frame():
                 time.sleep(0.1)
             img = cv2.imread("detection_frame.jpg")
-            print(img.shape)
             time.sleep(1)
 
             return D.predict_in_real_use(img)
