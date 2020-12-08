@@ -70,13 +70,24 @@ class download_videos:
 
         self.vid_paths = s
 
-    def download(self):
+    def download(self, vid_path):
         try:
             if not os.path.exists(self.output_dir_path):
                 os.makedirs(self.output_dir_path)
         except OSError:
             print ('Error: Creating directory of data')
         cmd = ['rclone', '-P', 'copy', 'HASRA' + str(self.cage_num) + ':homecage_' + str(self.cage_num) + '_sync/AnimalProfiles/MOUSE' + str(self.mouse_num) + '/Videos/' + vid_path, self.output_dir_path]
+
+    def download_loop(self):
+        for vid in self.vid_paths:
+            p = Popen(cmd, stdin=PIPE)
+            # have to wait until this p is finished before starting the next.. or at least cant call them all at once. Can I use barrier type obj?
+
+            # A None value indicates that the process hasn't terminated yet.
+            poll = p.poll()
+            if poll is None:
+            # p.subprocess is alive
+
 
 class analyze_videos:
     def __init__(self):
