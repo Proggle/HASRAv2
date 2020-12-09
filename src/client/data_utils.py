@@ -553,8 +553,9 @@ def prepare_for_training(output_folder):
 
 
 class thirds_w_handedness:
-    def __init__(self, input_videos_dir, handedness_file_path):
+    def __init__(self, input_videos_dir, output_dir, handedness_file_path):
         self.input_videos_dir = input_videos_dir
+        self.output_dir = output_dir
         self.handedness_file_path = handedness_file_path
         self.handedness_lookup = self.get_handedness()
 
@@ -575,11 +576,11 @@ class thirds_w_handedness:
 
     def video_file_splitter(self):
         # output avis will be stored in [cwd]/train_pro
-        output_dir = os.getcwd() + os.sep + 'train_pro'
+        # output_dir = os.getcwd() + os.sep + 'train_pro'
 
         try:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
         except OSError:
             print('Error: Creating directory of data')
 
@@ -609,9 +610,9 @@ class thirds_w_handedness:
                 print('video height and width: {}, {}'.format(h, w))
                 print('fps: ', fps)
 
-            left_fn = output_dir + os.sep + 'camera-1-' + curr[:-4] + '.avi'
-            mid_fn = output_dir + os.sep + 'camera-2-' + curr[:-4] + '.avi'
-            right_fn = output_dir + os.sep + 'camera-3-' + curr[:-4] + '.avi'
+            left_fn = self.output_dir + os.sep + 'camera-1-' + curr[:-4] + '.avi'
+            mid_fn = self.output_dir + os.sep + 'camera-2-' + curr[:-4] + '.avi'
+            right_fn = self.output_dir + os.sep + 'camera-3-' + curr[:-4] + '.avi'
 
             # left_fn = output_dir + os.sep + 'camera-1-' + curr[:-4] + '.mp4'
             # mid_fn = output_dir + os.sep + 'camera-2-' + curr[:-4] + '.mp4'
