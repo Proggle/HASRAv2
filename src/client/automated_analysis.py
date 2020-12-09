@@ -56,10 +56,11 @@ class download_videos:
             tmp_el = [x for x in tmp_el if x != '']
             if len(tmp_el) > 0:
                 tmp.append(tmp_el[1])
+        
+        self.vid_paths = tmp
+        # output = tmp
 
-        output = tmp
-
-        return output
+        # return output
 
     def remove_paths_outside_date_range(self):
         self.vid_paths = [x for x in self.vid_paths if self.date_in_range(x)]
@@ -87,7 +88,7 @@ class download_videos:
             except OSError:
                 print ('Error: Creating directory of data')
             cmd = ['rclone', '-P', 'copy', 'HASRA' + str(self.cage_num) + ':homecage_' + str(self.cage_num) + '_sync/AnimalProfiles/MOUSE' + str(self.mouse_num) + '/Videos/' + vid_path, self.output_dir_path]
-            
+
             p = Popen(cmd, stdin=PIPE)
             # have to wait until this p is finished before starting the next.. or at least cant call them all at once. Can I use barrier type obj?
 
@@ -113,9 +114,14 @@ class upload_videos:
 
 
 def main():
-    dv = download_videos(22, 1, start_date, output_dir_path, end_date, sample_percentage=10, vid_paths=vid_paths)
-    dv.remove_paths_outside_date_range()
-    dv.select_sample()
+    for cage_num in range(19, 23):
+        for mouse_num in range(1, 6):
+            dv = download_videos(cage_num, mouse_num, start_date, output_dir_path, end_date, sample_percentage=5, vid_paths=vid_paths)
+            dv.get_video_paths_from_rclone()
+            dv.remove_paths_outside_date_range()
+            dv.select_sample()
+            print(dv.vid_paths)
+            dv.download_loop()
     #at this stage vid_paths is good... can start trying to download them
     print(dv.vid_paths)
 
