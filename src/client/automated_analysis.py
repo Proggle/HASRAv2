@@ -87,15 +87,17 @@ class download_videos:
                     os.makedirs(self.output_dir_path)
             except OSError:
                 print ('Error: Creating directory of data')
-            cmd = ['rclone', '-P', 'copy', 'HASRA' + str(self.cage_num) + ':homecage_' + str(self.cage_num) + '_sync/AnimalProfiles/MOUSE' + str(self.mouse_num) + '/Videos/' + vid_path, self.output_dir_path]
+            cmd = ['rclone', '-P', 'copy', 'HASRA' + str(self.cage_num) + ':homecage_' + str(self.cage_num) + '_sync/AnimalProfiles/MOUSE' + str(self.mouse_num) + '/Videos/' + vid, self.output_dir_path]
 
             p = Popen(cmd, stdin=PIPE)
             # have to wait until this p is finished before starting the next.. or at least cant call them all at once. Can I use barrier type obj?
 
             # A None value indicates that the process hasn't terminated yet.
-            poll = p.poll()
-            while poll is None: # p.subprocess is alive
-                time.sleep(1)
+            # poll = p.poll()
+            # while poll is None: # p.subprocess is alive
+            #     time.sleep(1)
+
+            p.wait()
 
 
 class analyze_videos:
@@ -116,7 +118,7 @@ class upload_videos:
 def main():
     for cage_num in range(19, 23):
         for mouse_num in range(1, 6):
-            dv = download_videos(cage_num, mouse_num, start_date, output_dir_path, end_date, sample_percentage=5, vid_paths=vid_paths)
+            dv = download_videos(cage_num, mouse_num, output_dir_path, start_date, end_date, sample_percentage=5, vid_paths=vid_paths)
             dv.get_video_paths_from_rclone()
             dv.remove_paths_outside_date_range()
             dv.select_sample()
