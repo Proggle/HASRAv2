@@ -553,14 +553,15 @@ def prepare_for_training(output_folder):
 
 
 class thirds_w_handedness:
-    def __init__(self, input_videos_dir):
+    def __init__(self, input_videos_dir, handedness_file_path):
         self.input_videos_dir = input_videos_dir
+        self.handedness_file_path = handedness_file_path
         self.handedness_lookup = self.get_handedness()
 
     def get_handedness(self):
         handedness_lookup = defaultdict(str)
         try:
-            with open('../handedness.txt') as f:
+            with open(self.handedness_file_path) as f:
                 lines = f.readlines()
                 for l in lines:
                     l = l.replace('\n', '')
