@@ -63,7 +63,8 @@ class download_videos:
         # return output
 
     def remove_paths_outside_date_range(self):
-        self.vid_paths = [x for x in self.vid_paths if self.date_in_range(x)]
+        if self.start_date not None and self.end_date not None:
+            self.vid_paths = [x for x in self.vid_paths if self.date_in_range(x)]
 
     def select_sample(self):
         N = len(self.vid_paths)
@@ -99,9 +100,16 @@ class download_videos:
 
             p.wait()
 
+# need to have a new project created for each hc so that calibration can be done independently
+# this will have to be done manually in cli... for now
+# need hashmap mapping cage_num -> 3d_project_path as argument for analyze_videos
+
+cage_num_to_3d_project_path_dict = {19: '/path/to/3d_project_config', 22: '/path/to/3d_project_config'}
 
 class analyze_videos:
-    def __init__(self):
+    def __init__(self, cage_num_to_3d_project_path_dict, by_mouse=False, by_date=False, start_date=None, end_date=None):
+        self.cage_num_to_3d_project_path_dict = cage_num_to_3d_project_path_dict
+
         pass
 
     def analyze(self):
