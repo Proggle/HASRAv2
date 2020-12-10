@@ -551,7 +551,7 @@ def prepare_for_training(output_folder):
     y = y[index]
     return x, y
 
-
+# make default R if handedness.txt not found or if RFID tag not in dict
 class thirds_w_handedness:
     def __init__(self, input_videos_dir, output_dir, handedness_file_path):
         self.input_videos_dir = input_videos_dir
@@ -560,7 +560,7 @@ class thirds_w_handedness:
         self.handedness_lookup = self.get_handedness()
 
     def get_handedness(self):
-        handedness_lookup = defaultdict(str)
+        handedness_lookup = defaultdict(lambda: 'R')
         try:
             with open(self.handedness_file_path) as f:
                 lines = f.readlines()

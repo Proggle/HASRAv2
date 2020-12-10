@@ -117,15 +117,17 @@ class download_videos:
             p.wait()
 
 
-
+# need to get a detection model to write down when a reach is detected
 class cut_vids_on_reaches:
     def __init__(self):
         pass
 
+# TODO: how to handle for missing handedness.txt?
 class split_videos:
     def __init__(self, input_videos_dir):
         self.twh = thirds_w_handedness(input_videos_dir, split_videos_output_path, handedness_file_path)
-    
+        self.split()
+
     def split(self):
         self.twh.video_file_splitter()
 
