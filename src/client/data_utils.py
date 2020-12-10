@@ -525,7 +525,6 @@ def generate_dataset(input_folder, output_folder):
     video_stream.release()
 
 
-# TODO: remember to cvt to 3 channels
 def prepare_for_training(output_folder):
     pos_folder = os.path.join(output_folder, '1')
     neg_folder = os.path.join(output_folder, '0')
@@ -568,9 +567,10 @@ class thirds_w_handedness:
                     l = l.replace('\n', '')
                     tmp = l.split(' ')
                     handedness_lookup[tmp[0]] = tmp[1]
-        except IOError:
+        except:
             print('handedness.txt file not found')
-            print('please touch file and place ../[this script] or change pathing in this script')
+            print('please touch file or change pathing in this script')
+            print('since no file found all mice will be treated as default... which is right handed')
 
         return handedness_lookup
 
