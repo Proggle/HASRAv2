@@ -13,10 +13,15 @@ import os
 import time
 from data_utils import thirds_w_handedness
 
-# edit these values to choose what action you want this script to do
+# TODO: make SQL db?
+
+# edit these values to choose what action you want this script to do... this is basically the pipeline at a high level
 # needed for main()
 download = False
+cut = False
+split = True
 analyze = True
+delete = True
 upload = False
 
 # need these if filtering by date (range is inclusive, so to sample from one day just make both dates the same)
@@ -118,13 +123,13 @@ class download_videos:
 
 
 # need to get a detection model to write down when a reach is detected
-class cut_vids_on_reaches:
+class cut_videos:
     def __init__(self):
         pass
 
-# TODO: how to handle for missing handedness.txt?
+# TODO: how to handle for missing handedness.txt? .. fixed this issue, but havent tested yet
 class split_videos:
-    def __init__(self, input_videos_dir):
+    def __init__(self, input_videos_dir, split_videos_output_path, handedness_file_path):
         self.twh = thirds_w_handedness(input_videos_dir, split_videos_output_path, handedness_file_path)
         self.split()
 
@@ -138,10 +143,10 @@ class split_videos:
 # need hashmap mapping cage_num -> 3d_project_path as argument for analyze_videos
 
 class analyze_videos:
-    def __init__(self, cage_num_to_3d_project_path_dict, input_dir, destfolder, by_mouse=False, mouse_num=None, by_date=False, start_date=None, end_date=None):
+    def __init__(self, cage_num_to_3d_project_path_dict, dlc3d_input_path, dlc3d_output_path, by_mouse=False, mouse_num=None, by_date=False, start_date=None, end_date=None):
         self.cage_num_to_3d_project_path_dict = cage_num_to_3d_project_path_dict
-        self.input_dir = input_dir
-        self.destfolder = destfolder
+        self.dlc3d_input_path = dlc3d_input_path # this will be a directory with the split videos you want analyzed in it... passed to dlc.triangulate as video_path
+        self.dlc3d_output_path = dlc3d_output_path # this will be passed to dlc.triangulate as destfolder
         self.by_mouse = by_mouse
         self.mouse_num = mouse_num
         self.by_date = by_date
@@ -154,7 +159,12 @@ class analyze_videos:
     def analyze(self):
         pass
 
-class upload_videos:
+
+class delete_videos:
+    def __init__(self):
+        pass
+
+class upload_output:
     def __init__(self):
         pass
 
@@ -172,10 +182,18 @@ def main():
                 dv.select_sample()
                 print(dv.vid_paths)
                 dv.download_loop()
-    
+    if cut:
+        pass
+
+    if split:
+        sv = split_videos(input_videos_path, split_videos_output_path, handedness_file_path)
+
     if analyze:
         av = analyze_videos(cage_num_to_3d_project_path_dict)
     
+    if delete:
+        pass
+
     if upload:
         pass
 
