@@ -19,19 +19,35 @@ root_dir - Wave_1 - 001_Sham_Day42.csv
 Make your directory structure look like this and then pass this program the path of root_dir.
 
 Steps to run:
-    1: Navigate to the directory containing the program files
-    cd [the directory containing main.py]
+    1. Make a project directory. You can either right click and select new folder or use mkdir [project dir] in the command line.
+    
+    In my case I did this with:
+    cd
+    mkdir log_files_dir
+    
+    2. Move the log files into the project directory. You can right click on the log files directory, select "move to", and then select the project directory.
+       Or you can use mv [path/to/log_files] [path/to/project directory/log_files]
+
+    In my case I did this with:
+    mv /home/silasi/Downloads/log_files /home/silasi/log_files_dir/log_files
+    
+    3. Make a copy of this python program in the project directory.
+    
+    In my case I did this by copy pasting this file into a new file and naming it main.py.
+
+    4: Navigate to the project directory
+    cd [project directory]
 
     In my case I did this with:
     cd /home/gavin/log_file_analyzer
 
-    2: Run the program. 
-    python3 main.py [root_dir]
+    5: Run the program. 
+    python3 main.py [path/to/log_files]
 
     In my case I ran it with:
     python3 main.py '/home/gavin/log_file_analyzer/log_files'
 
-    3: Check the results
+    6: Check the results
     This program will create a csv file called "transposed_log_files.csv" in your current working directory.
     It might take a while to run so be patient.
 '''
