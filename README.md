@@ -95,11 +95,11 @@ Download nano sd card image from the nvidia downloads page… link above\
 	Write: #!/bin/bash
 		pgrep -af main.py
 22. Put below line in bashrc
-	$ alias is_running=’/home/homecage24/is_running.sh’
+	- $ alias is_running=’/home/homecage24/is_running.sh’
 23. Setup rclone by running and going through the steps:
-	$ rclone config
+	- $ rclone config
 24. Setup cronjobs to run rclone commands to send files to cloud storage
-	$ crontab -e
+	- $ crontab -e
 
 
 # **Assembly:**
