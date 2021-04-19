@@ -109,7 +109,7 @@ The videos and the log files will be stored in `your cloud drive\homecage_id_syn
 	- Ensure no sessions are currently running and that the motors have all moved back to their default positions. 
 	- Press the quit button on the GUI.
 	- Ctrl+c out of the program running in the terminal.
-
+#**Troubleshooting:**
 
 * Is everything plugged in?
 * Make sure you are in the correct virtual environment.
