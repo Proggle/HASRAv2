@@ -109,7 +109,7 @@ https://github.com/SilasiLab/HomeCageSinglePellet_server/blob/master/Homecage%20
 
 
 # **Usage**:
-### **Running the Device**
+### **Running on x86 with conda**
 1. Enter the virtual environment that the system was installed in by typing `conda activate <my_env>` into a terminal.
 
 2. Optional: Use `cd` to navigate to` HASRA_[cage number]/src/client/` and then run `python -B genProfiles.py`. The text prompts will walk you through entering your new animals into the system. Since the folder and the file are already inclued in this repo, this step is optional.
@@ -148,8 +148,6 @@ The videos and the log files will be stored in `your cloud drive\homecage_id_syn
 	- Press the quit button on the GUI.
 	- Ctrl+c out of the program running in the terminal.
 
-
-# **Troubleshooting**:
 
 * Is everything plugged in?
 * Make sure you are in the correct virtual environment.
