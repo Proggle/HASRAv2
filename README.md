@@ -85,13 +85,13 @@ Download nano sd card image from the nvidia downloads page… link above\
 16. $ sudo -H pip3 install -U jetson-stats
 17. Reboot
 18. Dont pip install requirements.txt…
-	$ pip3 install pyserial
-	$ pip3 install psutil
+	 - $ pip3 install pyserial
+	 - $ pip3 install psutil
 19.Remove all function calls in main.py that’re dependent on tk
 20. $ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
 21. Setup is_running
-	$ cd ~
-	$ vim is_running.sh
+	- $ cd ~
+	- $ vim is_running.sh
 	Write: #!/bin/bash
 		pgrep -af main.py
 22. Put below line in bashrc
