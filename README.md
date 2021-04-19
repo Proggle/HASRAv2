@@ -55,7 +55,7 @@ https://github.com/SilasiLab/HomecageSinglePellet_Manual
    `git clone https://github.com/SilasiLab/HASRAv2.git`
 6. `pip install /path/to/HASRA/dependencies/opencv_python-4.1.2+contrib-cp36-cp36m-win_amd64.whl` or you can just pip install
    opencv with `pip install opencv-python`. Currently we are using opencv v4.4.x
-7. Add ID of cage to the name of folder as postfix. (Rename the folder of the downloaded reporsitory as HASRA_[id]).
+7. Add ID of cage to the name of folder as postfix. (Rename the folder of the downloaded repository as HASRA_[id]).
 8. Create folders and profiles of the animals by running the  `genProfiles.py `
 	- `conda activate [name of your environment]`
 	- `cd /path/to/HASRA/src/client`
@@ -64,7 +64,7 @@ https://github.com/SilasiLab/HomecageSinglePellet_Manual
    The numbers will be printed to the console. Then you can go to /HASRA_[cage number]/AnimalProfiles/MOUSE1.
    Open up the .txt file in that folder and edit the first line to be the RFID tag number. Do this for each mouse.
 
-# **Software Installation for x86 (Jetson/ARM instructions below):**
+# **Software Installation Jetson/ARM:**
 
 1. Put sd card into host machine
 2. Make sure the contents of the sd can be deleted… ie back them up on the host machine if you need them or aren’t sure
@@ -87,16 +87,19 @@ Download nano sd card image from the nvidia downloads page… link above\
 18. Dont pip install requirements.txt…
 	$ pip3 install pyserial
 	$ pip3 install psutil
-	Remove all function calls in main.py that’re dependent on tk
-19. $ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
-20. Setup is_running
+19.Remove all function calls in main.py that’re dependent on tk
+20. $ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
+21. Setup is_running
 	$ cd ~
 	$ vim is_running.sh
 	Write: #!/bin/bash
 		pgrep -af main.py
-	Put below line in bashrc
+22. Put below line in bashrc
 	$ alias is_running=’/home/homecage24/is_running.sh’
-
+23. Setup rclone by running and going through the steps:
+	$ rclone config
+24. Setup cronjobs to run rclone commands to send files to cloud storage
+	$ crontab -e
 
 
 # **Assembly:**
