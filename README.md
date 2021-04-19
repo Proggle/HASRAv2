@@ -32,7 +32,7 @@ https://github.com/SilasiLab/HomecageSinglePellet_Manual
 	
 * Arduino IDE v1.8.5
 
-# **Software Installation for x86 (Jetson/ARM instructions below):**
+# **Software Installation for x86:**
 1. Windows 10 is strongly recommended for a better support of camera driver. Ubuntu 16.04 LTS is alternative.
 2. Install Anaconda. (https://www.anaconda.com/distribution/)
 3. Install Arduino IDE v1.8.5. (https://www.arduino.cc/en/Main/Software)
@@ -63,44 +63,6 @@ https://github.com/SilasiLab/HomecageSinglePellet_Manual
 9. If you don't know the RFID tag numbers for your tags you can run the task and scan each tag individually.
    The numbers will be printed to the console. Then you can go to /HASRA_[cage number]/AnimalProfiles/MOUSE1.
    Open up the .txt file in that folder and edit the first line to be the RFID tag number. Do this for each mouse.
-
-# **Software Installation Jetson/ARM:**
-
-1. Put sd card into host machine
-2. Make sure the contents of the sd can be deleted… ie back them up on the host machine if you need them or aren’t sure
-3. Use disks utility to format sd card
-4. https://developer.nvidia.com/jetson-nano-sd-card-image
-Download nano sd card image from the nvidia downloads page… link above\
-5. $ /usr/bin/unzip -p ~/Downloads/jetson_nano_devkit_sd_card.zip | sudo /bin/dd of=/dev/sd<x> bs=1M status=progress
-6. Use your file manager to eject the sd card once the above process is complete
-7. Put a jumper on your nano to allow for power from the barrel jack
-8. Put in the sd and give your nano power
-9. Allocate all the remaining blocks in your sd to your home fs
-10. Go through the setup normally… make a user and pw, etc
-11. $ sudo apt-get update && apt-get upgrade
-12. $ sudo apt install git-all
-13. $ git clone https://github.com/silasilab/hasra_jetson.git
-14. $ git clone https://github.com/JetsonHacksNano/CSI-Camera.git
-15. $ git clone https://github.com/jetsonhacks/jetsonUtilities.git
-16. $ sudo -H pip3 install -U jetson-stats
-17. Reboot
-18. Dont pip install requirements.txt…
-	 - $ pip3 install pyserial
-	 - $ pip3 install psutil
-19.Remove all function calls in main.py that’re dependent on tk
-20. $ sudo apt install libcanberra-gtk-module libcanberra-gtk3-module
-21. Setup is_running
-	- $ cd ~
-	- $ vim is_running.sh
-	Write: #!/bin/bash
-		pgrep -af main.py
-22. Put below line in bashrc
-	- $ alias is_running=’/home/homecage24/is_running.sh’
-23. Setup rclone by running and going through the steps:
-	- $ rclone config
-24. Setup cronjobs to run rclone commands to send files to cloud storage
-	- $ crontab -e
-
 
 # **Assembly:**
 
