@@ -53,7 +53,7 @@ def main():
         os.makedirs(animal_profiles_dir)
 
     cageNumber = input('Enter cage number: ')
-    print('Please remember to add Mouse RFID tag numbers, right now theyre all set to 0)
+    print('Please remember to add Mouse RFID tag numbers, right now theyre all set to 0')
     print('This can be done by opening up MOUSE_save.txt for each MOUSE and editing the first line')
 
     for i in range(1,6):
